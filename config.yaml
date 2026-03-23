@@ -1,0 +1,62 @@
+paths:
+  data_raw: "data/raw_batches"
+  models: "models"
+  reports: "reports"
+  metadata: "data/metadata"
+
+batch_size: "month"
+
+feature_cols:
+  - "SEX"
+  - "INSR_TYPE"
+  - "INSURED_VALUE"
+  - "PREMIUM"
+  - "PROD_YEAR"
+  - "SEATS_NUM"
+  - "CARRYING_CAPACITY"
+  - "TYPE_VEHICLE"
+  - "MAKE"
+  - "USAGE"
+
+categorical_cols:
+  - "SEX"
+  - "INSR_TYPE"
+  - "TYPE_VEHICLE"
+  - "MAKE"
+  - "USAGE"
+
+numerical_cols:
+  - "INSURED_VALUE"
+  - "PREMIUM"
+  - "PROD_YEAR"
+  - "SEATS_NUM"
+  - "CARRYING_CAPACITY"
+
+quality_rules:
+  - name: "premium_positive"
+    condition: "lambda df: df['PREMIUM'] >= 0"
+    expected: True
+  - name: "insured_value_positive"
+    condition: "lambda df: df['INSURED_VALUE'] >= 0"
+    expected: True
+  - name: "prod_year_valid"
+    condition: "lambda df: (df['PROD_YEAR'] >= 1900) & (df['PROD_YEAR'] <= 2025)"
+    expected: True
+  - name: "seats_positive"
+    condition: "lambda df: df['SEATS_NUM'] >= 0"
+    expected: True
+  - name: "capacity_with_truck"
+    condition: "lambda df: ~((df['TYPE_VEHICLE'] == 'truck') & (df['CARRYING_CAPACITY'].isna() | (df['CARRYING_CAPACITY'] <= 0)))"
+    expected: True
+
+models:
+  mlp:
+    hidden_layer_sizes: [50, 25]
+    activation: 'relu'
+    solver: 'adam'
+    max_iter: 200
+    warm_start: True
+  dt:
+    max_depth: 10
+    min_samples_split: 20
+    min_samples_leaf: 10
