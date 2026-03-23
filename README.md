@@ -20,8 +20,9 @@
 Требования
 
 - Python 3.12
+
 Установка зависимостей:
-- pip install -r requirements.txt
+pip install -r requirements.txt
 
 # Сценарии использования
 
