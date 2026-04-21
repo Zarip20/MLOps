@@ -2,6 +2,24 @@ import os
 import pandas as pd
 from src.utils import save_state, load_state
 
+import zipfile
+import os
+
+
+def extract_zip(zip_path, extract_to='data', expected_csv=None):
+    if expected_csv and os.path.exists(expected_csv):
+        return expected_csv
+    if not os.path.exists(zip_path):
+        raise FileNotFoundError(f"Ни файл {expected_csv}, ни архив {zip_path} не найдены.")
+    print(f"Распаковка {zip_path} в {extract_to}...")
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_to)
+    for root, dirs, files in os.walk(extract_to):
+        for file in files:
+            if file.endswith('.csv'):
+                return os.path.join(root, file)
+    raise RuntimeError("В архиве не найден CSV-файл.")
+
 def split_into_batches(original_path, time_col='INSR_BEGIN', output_dir='data/raw_batches'):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
