@@ -1,9 +1,7 @@
 import os
 import pandas as pd
 from src.utils import save_state, load_state
-
 import zipfile
-import os
 
 
 def extract_zip(zip_path, extract_to='data', expected_csv=None):
@@ -23,7 +21,7 @@ def extract_zip(zip_path, extract_to='data', expected_csv=None):
 def split_into_batches(original_path, time_col='INSR_BEGIN', output_dir='data/raw_batches'):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    df = pd.read_csv(original_path, parse_dates=[time_col])
+    df = pd.read_csv(original_path, parse_dates=[time_col], date_format='%d-%b-%y')
     df = df.sort_values(time_col).reset_index(drop=True)
     df['year_month'] = df[time_col].dt.to_period('M')
     batches = []
