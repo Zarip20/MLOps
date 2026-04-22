@@ -1,9 +1,12 @@
+import os
+import json
+from datetime import datetime
 import argparse
 import pandas as pd
 import logging
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import precision_score, recall_score, f1_score
-from src.data_collection import split_into_batches, get_next_batch, mark_batch_processed
+from src.data_collection import extract_zip, split_into_batches, get_next_batch, mark_batch_processed
 from src.data_quality import DataQualityEvaluator
 from src.preprocessing import create_preprocessor
 from src.training import train_models, load_or_create_models
@@ -11,7 +14,9 @@ from src.utils import load_config, save_metadata, save_model, load_model
 from src.association import generate_association_rules
 from sklearn.metrics import roc_auc_score
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+logging.basicConfig(filename='training.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 def update():
     import os
@@ -105,9 +110,6 @@ def inference(file_path):
     return output_path
 
 def summary():
-    import os
-    import json
-    from datetime import datetime
     config = load_config()
     meta_dir = config['paths']['metadata']
     quality_history = []
@@ -167,7 +169,14 @@ if __name__ == '__main__':
     parser.add_argument('-file', help='Путь к файлу для inference')
     args = parser.parse_args()
     if args.mode == 'init':
-        split_into_batches('data/motor_data14-2018.csv')
+        zip_path = 'data/motor_data14-2018.zip'
+        csv_path = 'data/motor_data14-2018.csv'
+        try:
+            actual_csv = extract_zip(zip_path, 'data', csv_path)
+        except Exception as e:
+            print(f"Ошибка при подготовке данных: {e}")
+            exit(1)
+        split_into_batches(actual_csv)
         print("Инициализация завершена, батчи созданы.")
     elif args.mode == 'update':
         success = update()
